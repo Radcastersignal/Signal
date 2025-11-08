@@ -21,26 +21,52 @@ type Page =
   | "analyst"
   | "userProfile";
 
+// قائمة الروابط التي تريد التحقق منها
+const embedUrlsToCheck: string[] = [
+  "https://example.com/page1",
+  "https://example.com/page2",
+  // يمكنك إضافة أي روابط أخرى هنا
+];
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedSignalId, setSelectedSignalId] = useState<string>("");
   const [selectedAnalystFid, setSelectedAnalystFid] = useState<number>(0);
 
   useEffect(() => {
-    // Initialize Farcaster Mini App SDK
-    const initSDK = async () => {
+    const initApp = async () => {
       try {
+        // 1️⃣ SDK جاهز
         await sdk.actions.ready();
         console.log('✅ Farcaster Mini App SDK ready');
+
+        // 2️⃣ فحص Embed URLs
+        for (const url of embedUrlsToCheck) {
+          try {
+            const result = await sdk.embed.check(url);
+            if (result.valid) {
+              console.log(`✅ Embed valid: ${url}`);
+            } else {
+              console.warn(`❌ Embed invalid: ${url}`);
+            }
+          } catch (err) {
+            console.error(`❌ Error checking embed URL: ${url}`, err);
+          }
+        }
+
+        // 3️⃣ تهيئة التطبيق بعد جاهزية SDK وفحص الروابط
+        await checkAndInitialize();
+
+        // 4️⃣ إخفاء Splash Screen
+        sdk.ui.hideSplashScreen();
+        console.log('Splash screen hidden');
+
       } catch (error) {
-        console.error('❌ Error initializing Farcaster SDK:', error);
+        console.error('❌ Error initializing app:', error);
       }
     };
-    
-    initSDK();
-    
-    // Initialize app with mock data on first load
-    checkAndInitialize();
+
+    initApp();
   }, []);
 
   const handleSignalClick = (signalId: string) => {
@@ -65,10 +91,7 @@ export default function App() {
             onSignalClick={handleSignalClick}
             onAnalystClick={handleAnalystClick}
             onProfileClick={() => setCurrentPage("userProfile")}
-            onNotificationsClick={() => {
-              // TODO: Implement notifications page
-              console.log("Notifications clicked");
-            }}
+            onNotificationsClick={() => console.log("Notifications clicked")}
             onAnalystsPageClick={() => setCurrentPage("analysts")}
             onCreateClick={() => setCurrentPage("create")}
           />
@@ -125,19 +148,15 @@ export default function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
       <UserProvider>
-        {/* Auto-connect wallet on app load */}
         <WalletConnector />
         
         <div className="fixed inset-0 bg-background overflow-hidden">
-          {/* Mobile Frame - Farcaster Miniapp Size - Full Screen */}
           <div className="w-full h-full max-w-[390px] max-h-[844px] mx-auto bg-background flex flex-col">
-            {/* App Content */}
             <div className="flex-1 overflow-hidden">
               {renderPage()}
             </div>
           </div>
           
-          {/* Toast Notifications */}
           <Toaster position="top-center" />
         </div>
       </UserProvider>
