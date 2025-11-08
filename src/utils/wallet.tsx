@@ -14,7 +14,7 @@ export interface WalletConnection {
 let connectedWallet: WalletConnection | null = null;
 
 // Platform wallet address (for receiving fees)
-const PLATFORM_WALLET = "0x0000000000000000000000000000000000000000"; // Replace with your wallet address
+const PLATFORM_WALLET = "0x4451426a3C074bF75327E4FA2f08f69C27189664"; // Replace with your wallet address
 
 /**
  * Connect wallet using Wagmi

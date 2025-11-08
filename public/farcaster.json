@@ -2,18 +2,17 @@
   "miniapp": {
     "version": "1",
     "name": "Signal",
-    "homeUrl": "https://your-domain.netlify.app/",
-    "iconUrl": "https://your-domain.netlify.app/assets/icon-1024.png",
-    "splashImageUrl": "https://your-domain.netlify.app/assets/splash-200.png",
+    "homeUrl": "https://your-app.netlify.app/",
+    "iconUrl": "https://your-app.netlify.app/icon.png",
+    "splashImageUrl": "https://your-app.netlify.app/splash.png",
     "splashBackgroundColor": "#1C1C1F",
     "subtitle": "Crypto Signals",
-    "description": "A Farcaster Mini App for crypto signal sharing",
+    "description": "A Farcaster Mini App for sharing crypto trading signals",
     "screenshotUrls": [
-      "https://your-domain.netlify.app/assets/screenshot-1.png"
+      "https://your-app.netlify.app/screenshot.png"
     ],
     "primaryCategory": "finance",
-    "tags": ["crypto", "signals"],
-    "heroImageUrl": "https://your-domain.netlify.app/assets/hero.png",
-    "canonicalDomain": "your-domain.netlify.app"
+    "tags": ["crypto", "signals", "farcaster"],
+    "canonicalDomain": "your-app.netlify.app"
   }
 }
