@@ -3,7 +3,6 @@ import { WagmiProvider } from 'wagmi';
 import { wagmiConfig } from './utils/wagmiConfig';
 import { UserProvider } from "./contexts/UserContext";
 import { HomePage } from "./components/HomePage";
-import { checkAndInitialize } from "./utils/initializeApp";
 import { AnalystsPage } from "./components/AnalystsPage";
 import { UserProfilePage } from "./components/UserProfilePage";
 import { AnalystProfilePage } from "./components/AnalystProfilePage";
@@ -12,35 +11,44 @@ import { CreateSignalPage } from "./components/CreateSignalPage";
 import { WalletConnector } from "./components/WalletConnector";
 import { Toaster } from "./components/ui/sonner";
 import { sdk } from '@farcaster/miniapp-sdk';
+import { checkAndInitialize } from "./utils/initializeApp";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-type Page = 
-  | "home" 
+type Page =
+  | "home"
   | "analysts"
   | "create"
-  | "signal" 
+  | "signal"
   | "analyst"
   | "userProfile";
 
-// قائمة الروابط التي تريد التحقق منها
+// أضف روابط المدمجة التي تريد التحقق منها
 const embedUrlsToCheck: string[] = [
   "https://example.com/page1",
   "https://example.com/page2",
-  // يمكنك إضافة أي روابط أخرى هنا
 ];
+
+// إنشاء العميل الخاص بـ react-query
+const queryClient = new QueryClient();
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
+  const [initialized, setInitialized] = useState(false);
   const [selectedSignalId, setSelectedSignalId] = useState<string>("");
   const [selectedAnalystFid, setSelectedAnalystFid] = useState<number>(0);
 
   useEffect(() => {
-    const initApp = async () => {
+    const handleDOMContentLoaded = async () => {
       try {
-        // 1️⃣ SDK جاهز
         await sdk.actions.ready();
-        console.log('✅ Farcaster Mini App SDK ready');
+        console.log("✅ Farcaster SDK is ready");
 
-        // 2️⃣ فحص Embed URLs
+        // تحقق ما إذا كانت الدالة hideSplashScreen موجودة ثم قم باستدعائها
+        if (sdk.ui && typeof sdk.ui.hideSplashScreen === 'function') {
+          sdk.ui.hideSplashScreen();
+          console.log("Splash screen hidden");
+        }
+
         for (const url of embedUrlsToCheck) {
           try {
             const result = await sdk.embed.check(url);
@@ -54,36 +62,40 @@ export default function App() {
           }
         }
 
-        // 3️⃣ تهيئة التطبيق بعد جاهزية SDK وفحص الروابط
         await checkAndInitialize();
 
-        // 4️⃣ إخفاء Splash Screen
-        sdk.ui.hideSplashScreen();
-        console.log('Splash screen hidden');
-
-      } catch (error) {
-        console.error('❌ Error initializing app:', error);
+        setInitialized(true);
+      } catch (err) {
+        console.error("❌ Error initializing Farcaster SDK:", err);
       }
     };
 
-    initApp();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", handleDOMContentLoaded);
+    } else {
+      handleDOMContentLoaded();
+    }
   }, []);
 
   const handleSignalClick = (signalId: string) => {
+    if (!initialized) return;
     setSelectedSignalId(signalId);
     setCurrentPage("signal");
   };
 
   const handleAnalystClick = (fid: number) => {
+    if (!initialized) return;
     setSelectedAnalystFid(fid);
     setCurrentPage("analyst");
   };
 
   const handlePublish = () => {
+    if (!initialized) return;
     setCurrentPage("home");
   };
 
   const renderPage = () => {
+    if (!initialized) return null;
     switch (currentPage) {
       case "home":
         return (
@@ -96,7 +108,6 @@ export default function App() {
             onCreateClick={() => setCurrentPage("create")}
           />
         );
-      
       case "analysts":
         return (
           <AnalystsPage
@@ -104,7 +115,6 @@ export default function App() {
             onAnalystClick={handleAnalystClick}
           />
         );
-      
       case "userProfile":
         return (
           <UserProfilePage
@@ -113,7 +123,6 @@ export default function App() {
             onAnalystClick={handleAnalystClick}
           />
         );
-      
       case "analyst":
         return (
           <AnalystProfilePage
@@ -122,7 +131,6 @@ export default function App() {
             onSignalClick={handleSignalClick}
           />
         );
-      
       case "signal":
         return (
           <SignalDetailPage
@@ -131,7 +139,6 @@ export default function App() {
             onAnalystClick={handleAnalystClick}
           />
         );
-      
       case "create":
         return (
           <CreateSignalPage
@@ -139,7 +146,6 @@ export default function App() {
             onPublish={handlePublish}
           />
         );
-      
       default:
         return null;
     }
@@ -147,19 +153,19 @@ export default function App() {
 
   return (
     <WagmiProvider config={wagmiConfig}>
-      <UserProvider>
-        <WalletConnector />
-        
-        <div className="fixed inset-0 bg-background overflow-hidden">
-          <div className="w-full h-full max-w-[390px] max-h-[844px] mx-auto bg-background flex flex-col">
-            <div className="flex-1 overflow-hidden">
-              {renderPage()}
+      <QueryClientProvider client={queryClient}>
+        <UserProvider>
+          <WalletConnector />
+          <div className="fixed inset-0 bg-background overflow-hidden">
+            <div className="w-full h-full max-w-[390px] max-h-[844px] mx-auto bg-background flex flex-col">
+              <div className="flex-1 overflow-hidden">
+                {renderPage()}
+              </div>
             </div>
+            <Toaster position="top-center" />
           </div>
-          
-          <Toaster position="top-center" />
-        </div>
-      </UserProvider>
+        </UserProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
