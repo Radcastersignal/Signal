@@ -1,6 +1,7 @@
+// src/App.tsx
 import { useState, useEffect } from "react";
-import { WagmiProvider } from 'wagmi';
-import { wagmiConfig } from './utils/wagmiConfig';
+import { WagmiProvider } from "wagmi";
+import { wagmiConfig } from "./utils/wagmiConfig";
 import { UserProvider } from "./contexts/UserContext";
 import { HomePage } from "./components/HomePage";
 import { AnalystsPage } from "./components/AnalystsPage";
@@ -10,9 +11,11 @@ import { SignalDetailPage } from "./components/SignalDetailPage";
 import { CreateSignalPage } from "./components/CreateSignalPage";
 import { WalletConnector } from "./components/WalletConnector";
 import { Toaster } from "./components/ui/sonner";
-import { sdk } from '@farcaster/miniapp-sdk';
+import { sdk } from "@farcaster/miniapp-sdk";
 import { checkAndInitialize } from "./utils/initializeApp";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FarcasterInit } from "./components/FarcasterInit";
+import { FarcasterProvider } from "./context/FarcasterContext"; // ✅ تمت الإضافة
 
 type Page =
   | "home"
@@ -22,13 +25,11 @@ type Page =
   | "analyst"
   | "userProfile";
 
-// أضف روابط المدمجة التي تريد التحقق منها
 const embedUrlsToCheck: string[] = [
   "https://example.com/page1",
   "https://example.com/page2",
 ];
 
-// إنشاء العميل الخاص بـ react-query
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -43,8 +44,7 @@ export default function App() {
         await sdk.actions.ready();
         console.log("✅ Farcaster SDK is ready");
 
-        // تحقق ما إذا كانت الدالة hideSplashScreen موجودة ثم قم باستدعائها
-        if (sdk.ui && typeof sdk.ui.hideSplashScreen === 'function') {
+        if (sdk.ui && typeof sdk.ui.hideSplashScreen === "function") {
           sdk.ui.hideSplashScreen();
           console.log("Splash screen hidden");
         }
@@ -63,7 +63,6 @@ export default function App() {
         }
 
         await checkAndInitialize();
-
         setInitialized(true);
       } catch (err) {
         console.error("❌ Error initializing Farcaster SDK:", err);
@@ -154,17 +153,18 @@ export default function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <UserProvider>
-          <WalletConnector />
-          <div className="fixed inset-0 bg-background overflow-hidden">
-            <div className="w-full h-full max-w-[390px] max-h-[844px] mx-auto bg-background flex flex-col">
-              <div className="flex-1 overflow-hidden">
-                {renderPage()}
+        <FarcasterProvider> {/* ✅ تمت الإحاطة هنا */}
+          <UserProvider>
+            <WalletConnector />
+            <FarcasterInit />
+            <div className="fixed inset-0 bg-background overflow-hidden">
+              <div className="w-full h-full max-w-[390px] max-h-[844px] mx-auto bg-background flex flex-col">
+                <div className="flex-1 overflow-hidden">{renderPage()}</div>
               </div>
+              <Toaster position="top-center" />
             </div>
-            <Toaster position="top-center" />
-          </div>
-        </UserProvider>
+          </UserProvider>
+        </FarcasterProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

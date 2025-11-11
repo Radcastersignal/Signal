@@ -9,35 +9,9 @@ import { sdk } from '@farcaster/miniapp-sdk';
 
 // Mock Farcaster data for development
 // In production, replace this with real API calls
-const MOCK_USERS: Record<number, FarcasterUser> = {
-  1: {
-    fid: 1,
-    username: "cryptomax",
-    displayName: "CryptoMax",
-    pfpUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop",
-    bio: "Onchain analytics specialist with 5+ years experience. Focused on whale movements and institutional flows.",
-    followerCount: 1423,
-    walletAddress: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1"
-  },
-  2: {
-    fid: 2,
-    username: "memeanalyst",
-    displayName: "MemeAnalyst",
-    pfpUrl: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&h=200&fit=crop",
-    bio: "Memecoin specialist. Finding gems before they moon 🚀",
-    followerCount: 2156,
-    walletAddress: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-  },
-  3: {
-    fid: 3,
-    username: "defiguru",
-    displayName: "DeFiGuru",
-    pfpUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
-    bio: "DeFi protocol analyst. Tracking TVL, yields, and risks.",
-    followerCount: 3421,
-    walletAddress: "0xdD2FD4581271e230360230F9337D5c0430Bf44C0"
-  }
-};
+import { useRealUser } from "../hooks/useRealUser";
+const { user, loading } = useRealUser();
+
 
 let currentUser: FarcasterUser | null = null;
 
@@ -91,21 +65,24 @@ export function getCurrentUser(): FarcasterUser | null {
  */
 export async function getUserByFid(fid: number): Promise<FarcasterUser | null> {
   try {
-    // In production, use API to get user data
+    // 🟢 في بيئة الإنتاج، استخدم API لجلب بيانات المستخدم الحقيقي
     // const user = await farcaster.getUser(fid);
-    
-    // For development
-    return MOCK_USERS[fid] || null;
+    // return user;
+
+    // 🟡 في الوضع الحالي (تجريبي)، نعيد null لعدم توفر بيانات فعلية
+    return null;
   } catch (error) {
-    console.error('Error fetching user:', error);
+    console.error("❌ Error fetching user by FID:", error);
     return null;
   }
 }
 
 /**
- * Post to Farcaster (Cast)
- * في الإنتاج، هذا سينشر على Farcaster
+ * 🟣 Post to Farcaster (Cast)
+ * في الإنتاج، هذا الجزء سيكون مسؤول عن نشر محتوى أو تفاعل على شبكة Farcaster.
  */
+
+
 export async function postToFarcaster(
   text: string,
   embeds?: { url?: string; castId?: string }[]

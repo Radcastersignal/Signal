@@ -14,7 +14,7 @@ All requested features have been successfully implemented for the Farcaster Mini
 ### 2. New Signal Type: "General"
 - ✅ Added "General" as the first signal type in dropdown
 - ✅ Updated types.tsx to include "general" type
-- ✅ Updated mockData with General category signals
+- ✅ Integrated real user data (removed mockData usage)
 - ✅ Category filter includes "General" option
 
 ### 3. Renamed "OUTLOOK" to "Foresight"
@@ -115,7 +115,7 @@ All requested features have been successfully implemented for the Farcaster Mini
 5. `/components/AnalystProfilePage.tsx` - Total sales, share button, removed subscribe
 6. `/components/UserProfilePage.tsx` - Translation to English
 7. `/types/index.tsx` - Added "general" type, updated categories
-8. `/utils/mockData.tsx` - General signals, updated categories
+8. `/hooks/useRealUser.tsx` - Integrated real Farcaster user data instead of mockData
 9. `/utils/farcaster.tsx` - Translated comments
 10. `/utils/initializeApp.tsx` - Added expired signals checker
 11. `/supabase/functions/server/index.tsx` - Purchase notifications, success rating, expired checks

@@ -1,33 +1,27 @@
-// Initialize app with mock data for development
-import { generateMockSignals } from './mockData';
-import { createSignal } from './api';
+// Initialize app with real data (no mock)
+import { fetchSignalsFromAPI } from './api';
 import { projectId, publicAnonKey } from './supabase/info';
 
 export async function initializeAppData() {
   try {
-    console.log('🎬 Initializing app with mock data...');
-    
-    // Generate mock signals
-    const signals = generateMockSignals();
-    
-    // Store them in the database (one by one to avoid rate limits)
-    for (const signal of signals) {
-      try {
-        await createSignal(signal);
-        console.log(`✅ Created signal: ${signal.title}`);
-      } catch (error) {
-        // Signal might already exist, that's ok
-        console.log(`⚠️ Signal already exists or error: ${signal.id}`);
-      }
+    console.log('🎬 Initializing app with real data...');
+
+    // Fetch signals from your backend API or Supabase
+    const signals = await fetchSignalsFromAPI();
+
+    if (!signals || signals.length === 0) {
+      console.warn('⚠️ No signals found in database.');
+      return false;
     }
-    
-    console.log('✅ App initialized successfully!');
+
+    console.log(`✅ Loaded ${signals.length} signals from API.`);
     return true;
   } catch (error) {
-    console.error('❌ Error initializing app:', error);
+    console.error('❌ Error initializing app with real data:', error);
     return false;
   }
 }
+
 
 // Check for expired signals periodically
 async function checkExpiredSignals() {

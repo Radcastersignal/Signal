@@ -1,10 +1,12 @@
-import { useState } from "react";
+// src/components/Comments.tsx
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useUser } from "../contexts/UserContext";
+import { getCommentsForSignal, postComment } from "../utils/api"; // «› —«÷ ÊÃÊœ API
 
 interface Comment {
   id: string;
@@ -27,8 +29,26 @@ export function Comments({ signalId, analystFid }: CommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSubmit = () => {
+  //  Õ„Ì· «· ⁄·Ìﬁ«  ⁄‰œ «· ÂÌ∆…
+  useEffect(() => {
+    async function loadComments() {
+      setIsLoading(true);
+      try {
+        const fetchedComments = await getCommentsForSignal(signalId);
+        setComments(fetchedComments);
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadComments();
+  }, [signalId]);
+
+  const handleSubmit = async () => {
     if (!newComment.trim() || !user) return;
 
     const comment: Comment = {
@@ -45,6 +65,53 @@ export function Comments({ signalId, analystFid }: CommentsProps) {
     setComments([...comments, comment]);
     setNewComment("");
     setReplyingTo(null);
+
+    // ≈—”«· «· ⁄·Ìﬁ ··‹ API
+    try {
+      await postComment(signalId, comment);
+    } catch (error) {
+      console.error("Failed to post comment:", error);
+    }
+  };
+
+  // ⁄—÷ «· ⁄·Ìﬁ«  »‘ﬂ· „ œ—Ã Õ”» «·—œ
+  const renderComments = (parentId?: string) => {
+    return comments
+      .filter((c) => c.replyTo === parentId)
+      .map((comment) => (
+        <div key={comment.id} className={`flex gap-2 ${comment.replyTo ? "ml-8" : ""}`}>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={comment.userImage} />
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+              {comment.userName[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm text-foreground">{comment.userName}</span>
+              {comment.isAnalyst && (
+                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">
+                  Analyst
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {new Date(comment.timestamp).toLocaleDateString()}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-1">{comment.content}</p>
+            {user?.fid === analystFid && !comment.isAnalyst && (
+              <button
+                onClick={() => setReplyingTo(comment.id)}
+                className="text-xs text-primary hover:underline"
+              >
+                Reply
+              </button>
+            )}
+            {/* «·—œÊœ «·„ œ«Œ·… */}
+            {renderComments(comment.id)}
+          </div>
+        </div>
+      ));
   };
 
   return (
@@ -93,43 +160,14 @@ export function Comments({ signalId, analystFid }: CommentsProps) {
 
       {/* Comments List */}
       <div className="space-y-3">
-        {comments.length === 0 ? (
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground text-center py-4">Loading comments...</p>
+        ) : comments.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
             No comments yet. Be the first to share your thoughts!
           </p>
         ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className={`flex gap-2 ${comment.replyTo ? 'ml-8' : ''}`}>
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={comment.userImage} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                  {comment.userName[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm text-foreground">{comment.userName}</span>
-                  {comment.isAnalyst && (
-                    <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">
-                      Analyst
-                    </span>
-                  )}
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(comment.timestamp).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">{comment.content}</p>
-                {user?.fid === analystFid && !comment.isAnalyst && (
-                  <button
-                    onClick={() => setReplyingTo(comment.id)}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Reply
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
+          renderComments()
         )}
       </div>
     </Card>

@@ -12,11 +12,12 @@
   - Notifications
 
 ### Utilities
-- ✅ `/utils/farcaster.tsx` - Farcaster integration (mock for development)
-- ✅ `/utils/wallet.tsx` - Wallet connection (mock for development)
+- ✅ `/utils/farcaster.tsx` - Farcaster integration using real SDK data
+- ✅ `/utils/wallet.tsx` - Real wallet connection via wagmi and Farcaster SDK
 - ✅ `/utils/api.tsx` - API client for backend
-- ✅ `/utils/mockData.tsx` - Mock data generator
-- ✅ `/utils/initializeApp.tsx` - App initialization
+- 🚫 تم الاستغناء عن `/utils/mockData.tsx` (أُزيلت بيانات المحاكاة)
+- ✅ `/utils/initializeApp.tsx` - App initialization and real user setup
+
 
 ### Types
 - ✅ `/types/index.tsx` - Complete TypeScript types for all data structures

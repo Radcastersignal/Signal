@@ -369,7 +369,7 @@ const { user, wallet, isLoading, refreshUser, connectUserWallet } = useUser();
 
 ### 7. البيانات التجريبية ✅
 
-**الملف**: `/utils/mockData.tsx`
+**الملف**: `/hooks/useRealUser.tsx`
 
 مولّد بيانات تجريبية لـ:
 - 10 توصيات متنوعة (الأنواع الأربعة)

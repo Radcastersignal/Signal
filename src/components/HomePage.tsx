@@ -1,3 +1,4 @@
+﻿// src/components/HomePage.tsx
 import { useState, useEffect } from "react";
 import { Search, Filter, Bell, TrendingUp, User, Plus, BarChart3, Share2 } from "lucide-react";
 import { Input } from "./ui/input";
@@ -9,7 +10,7 @@ import { ShareDialog } from "./ShareDialog";
 import { NotificationPanel } from "./NotificationPanel";
 import { BaseSignal, SignalType, SignalCategory } from "../types";
 import { getAllSignals } from "../utils/api";
-import { useUser } from "../contexts/UserContext";
+import { useFarcaster } from "../context/FarcasterContext";
 
 interface HomePageProps {
   onSignalClick: (signalId: string) => void;
@@ -51,7 +52,7 @@ export function HomePage({
   onAnalystsPageClick,
   onCreateClick
 }: HomePageProps) {
-  const { user } = useUser();
+  const { user, loading } = useFarcaster(); // ✅ استخدام FarcasterContext
   const [signals, setSignals] = useState<BaseSignal[]>([]);
   const [filteredSignals, setFilteredSignals] = useState<BaseSignal[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -115,7 +116,7 @@ export function HomePage({
         filtered.sort((a, b) => b.purchaseCount - a.purchaseCount);
         break;
       case "recent":
-        filtered.sort((a, b) => 
+        filtered.sort((a, b) =>
           new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
         );
         break;

@@ -98,8 +98,8 @@ export async function initializeFarcaster(): Promise<FarcasterUser | null> {
     };
   }
   
-  // Fallback to mock data in development
-  return MOCK_USERS[1];
+  // Return null if real user data is not available
+  return null;
 }
 ```
 
