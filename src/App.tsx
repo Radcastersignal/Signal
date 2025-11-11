@@ -39,16 +39,19 @@ export default function App() {
   const [selectedAnalystFid, setSelectedAnalystFid] = useState<number>(0);
 
   useEffect(() => {
-    const handleDOMContentLoaded = async () => {
+    const initializeApp = async () => {
       try {
-        await sdk.actions.ready();
-        console.log("✅ Farcaster SDK is ready");
+        // ✅ أهم خطوة: إعلام Warpcast أن التطبيق جاهز فورًا
+        sdk.actions.ready();
+        console.log("✅ sdk.actions.ready() called immediately");
 
+        // ✅ إخفاء شاشة البداية إذا كانت مدعومة
         if (sdk.ui && typeof sdk.ui.hideSplashScreen === "function") {
           sdk.ui.hideSplashScreen();
           console.log("Splash screen hidden");
         }
 
+        // فحص الروابط المضمنة (اختياري)
         for (const url of embedUrlsToCheck) {
           try {
             const result = await sdk.embed.check(url);
@@ -62,6 +65,7 @@ export default function App() {
           }
         }
 
+        // تهيئة التطبيق والبيانات
         await checkAndInitialize();
         setInitialized(true);
       } catch (err) {
@@ -69,11 +73,7 @@ export default function App() {
       }
     };
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", handleDOMContentLoaded);
-    } else {
-      handleDOMContentLoaded();
-    }
+    initializeApp();
   }, []);
 
   const handleSignalClick = (signalId: string) => {
@@ -153,7 +153,7 @@ export default function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <FarcasterProvider> {/* ✅ تمت الإحاطة هنا */}
+        <FarcasterProvider>
           <UserProvider>
             <WalletConnector />
             <FarcasterInit />
