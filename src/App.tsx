@@ -15,7 +15,7 @@ import { sdk } from "@farcaster/miniapp-sdk";
 import { checkAndInitialize } from "./utils/initializeApp";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FarcasterInit } from "./components/FarcasterInit";
-import { FarcasterProvider } from "./context/FarcasterContext"; // ✅ تمت الإضافة
+import { FarcasterProvider } from "./context/FarcasterContext";
 
 type Page =
   | "home"
@@ -41,14 +41,21 @@ export default function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // ✅ أهم خطوة: إعلام Warpcast أن التطبيق جاهز فورًا
-        sdk.actions.ready();
-        console.log("✅ sdk.actions.ready() called immediately");
+        // تهيئة التطبيق والبيانات أولًا
+        await checkAndInitialize();
+        setInitialized(true);
 
-        // ✅ إخفاء شاشة البداية إذا كانت مدعومة
+        // ثم ننتظر قليلًا للتأكد من أن كل شيء جاهز للرسم (تأخير بسيط اختياري)
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // استدعاء sdk.actions.ready() بعد الجاهزية الكاملة لإخفاء شاشة الـ Splash
+        await sdk.actions.ready();
+        console.log("✅ sdk.actions.ready() called after initialization");
+
+        // إخفاء شاشة البداية إذا كانت مدعومة (اختياري)
         if (sdk.ui && typeof sdk.ui.hideSplashScreen === "function") {
           sdk.ui.hideSplashScreen();
-          console.log("Splash screen hidden");
+          console.log("Splash screen hidden via sdk.ui.hideSplashScreen()");
         }
 
         // فحص الروابط المضمنة (اختياري)
@@ -64,10 +71,6 @@ export default function App() {
             console.error(`❌ Error checking embed URL: ${url}`, err);
           }
         }
-
-        // تهيئة التطبيق والبيانات
-        await checkAndInitialize();
-        setInitialized(true);
       } catch (err) {
         console.error("❌ Error initializing Farcaster SDK:", err);
       }
