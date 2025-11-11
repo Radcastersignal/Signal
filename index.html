@@ -1,15 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Farcaster Miniapp Design</title>
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Farcaster Miniapp Design</title>
-    </head>
+    <!-- Farcaster Miniapp meta tag -->
+    <meta name="fc:miniapp" content='{
+      "version":"1",
+      "imageUrl":"https://signalhub.netlify.app/image.png",
+      "button": {
+        "title": "Signal",
+        "action": {
+          "type": "launch_frame",
+          "name": "Signal",
+          "url": "https://signalhub.netlify.app",
+          "splashImageUrl": "https://signalhub.netlify.app/splash.png",
+          "splashBackgroundColor": "#1C1C1F"
+        }
+      }
+    }' />
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+    <!-- For backward compatibility -->
+    <meta name="fc:frame" content='{
+      "version":"1",
+      "imageUrl":"https://signalhub.netlify.app/image.png",
+      "button": {
+        "title": "Signal",
+        "action": {
+          "type": "launch_frame",
+          "name": "Signal",
+          "url": "https://signalhub.netlify.app",
+          "splashImageUrl": "https://signalhub.netlify.app/splash.png",
+          "splashBackgroundColor": "#1C1C1F"
+        }
+      }
+    }' />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
