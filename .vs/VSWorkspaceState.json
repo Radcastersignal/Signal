@@ -1,8 +1,13 @@
 {
   "ExpandedNodes": [
     "",
+    "\\public",
+    "\\public\\.well-known",
     "\\src",
-    "\\src\\hooks"
+    "\\src\\contexts",
+    "\\src\\hooks",
+    "\\src\\utils"
   ],
+  "SelectedNode": "\\public\\.well-known\\farcaster.json",
   "PreviewInSolutionExplorer": false
 }
