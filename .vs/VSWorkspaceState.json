@@ -1,13 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
     "\\public\\.well-known",
     "\\src",
-    "\\src\\contexts",
-    "\\src\\hooks",
-    "\\src\\utils"
+    "\\src\\components",
+    "\\src\\components\\figma"
   ],
-  "SelectedNode": "\\public\\.well-known\\farcaster.json",
+  "SelectedNode": "\\src\\components\\ExplorePage.tsx",
   "PreviewInSolutionExplorer": false
 }
