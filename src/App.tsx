@@ -11,20 +11,25 @@ import { SignalDetailPage } from "./components/SignalDetailPage";
 import { CreateSignalPage } from "./components/CreateSignalPage";
 import { WalletConnector } from "./components/WalletConnector";
 import { Toaster } from "./components/ui/sonner";
-import sdk from "@farcaster/frame-sdk";
 import { checkAndInitialize } from "./utils/initializeApp";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FarcasterProvider } from "./context/FarcasterContext";
 
-type Page =
-  | "home"
-  | "analysts"
-  | "create"
-  | "signal"
-  | "analyst"
-  | "userProfile";
-
+type Page = "home" | "analysts" | "create" | "signal" | "analyst" | "userProfile";
 const queryClient = new QueryClient();
+
+// ✅ استدعاء ready() مباشرة عند تحميل الملف
+if (typeof window !== 'undefined') {
+  (async () => {
+    try {
+      const sdk = await import("@farcaster/frame-sdk");
+      sdk.default.actions.ready();
+      console.log("✅✅✅ FARCASTER SDK READY CALLED ✅✅✅");
+    } catch (e) {
+      console.error("❌ SDK Error:", e);
+    }
+  })();
+}
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
@@ -33,62 +38,35 @@ export default function App() {
   const [selectedAnalystFid, setSelectedAnalystFid] = useState<number>(0);
 
   useEffect(() => {
-    const initializeApp = async () => {
+    const initApp = async () => {
       try {
-        console.log("🚀 Starting Farcaster initialization...");
-        
-        // ✅ الخطوة 1: إخبار Farcaster فوراً بأن التطبيق جاهز
-        sdk.actions.ready();
-        console.log("✅ sdk.actions.ready() called successfully");
-
-        // ✅ الخطوة 2: تهيئة باقي التطبيق في الخلفية
         await checkAndInitialize();
         setInitialized(true);
-        console.log("✅ App initialized successfully");
-
+        console.log("✅ App initialized");
       } catch (err) {
-        console.error("❌ Error during initialization:", err);
-        // ✅ حتى في حالة الخطأ، نسمح للتطبيق بالظهور
+        console.error("❌ Init error:", err);
         setInitialized(true);
-        // ✅ نتأكد من استدعاء ready() حتى لو فشلت التهيئة
-        try {
-          sdk.actions.ready();
-        } catch (sdkError) {
-          console.error("❌ Error calling sdk.actions.ready():", sdkError);
-        }
       }
     };
-
-    initializeApp();
+    initApp();
   }, []);
 
-  const handleSignalClick = (signalId: string) => {
-    setSelectedSignalId(signalId);
-    setCurrentPage("signal");
-  };
+  if (!initialized) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00ffcc] mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg font-bold">DATA SIGNALS HUB</p>
+          <p className="text-gray-500 text-sm mt-2">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleAnalystClick = (fid: number) => {
-    setSelectedAnalystFid(fid);
-    setCurrentPage("analyst");
-  };
-
-  const handlePublish = () => {
-    setCurrentPage("home");
-  };
+  const handleSignalClick = (id: string) => { setSelectedSignalId(id); setCurrentPage("signal"); };
+  const handleAnalystClick = (fid: number) => { setSelectedAnalystFid(fid); setCurrentPage("analyst"); };
 
   const renderPage = () => {
-    // ✅ عرض شاشة تحميل بسيطة أثناء التهيئة
-    if (!initialized) {
-      return (
-        <div className="flex items-center justify-center h-screen bg-white">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00ffcc] mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading Data Signals Hub...</p>
-          </div>
-        </div>
-      );
-    }
-
     switch (currentPage) {
       case "home":
         return (
@@ -96,18 +74,13 @@ export default function App() {
             onSignalClick={handleSignalClick}
             onAnalystClick={handleAnalystClick}
             onProfileClick={() => setCurrentPage("userProfile")}
-            onNotificationsClick={() => console.log("Notifications clicked")}
+            onNotificationsClick={() => {}}
             onAnalystsPageClick={() => setCurrentPage("analysts")}
             onCreateClick={() => setCurrentPage("create")}
           />
         );
       case "analysts":
-        return (
-          <AnalystsPage
-            onBack={() => setCurrentPage("home")}
-            onAnalystClick={handleAnalystClick}
-          />
-        );
+        return <AnalystsPage onBack={() => setCurrentPage("home")} onAnalystClick={handleAnalystClick} />;
       case "userProfile":
         return (
           <UserProfilePage
@@ -133,18 +106,9 @@ export default function App() {
           />
         );
       case "create":
-        return (
-          <CreateSignalPage
-            onBack={() => setCurrentPage("home")}
-            onPublish={handlePublish}
-          />
-        );
+        return <CreateSignalPage onBack={() => setCurrentPage("home")} onPublish={() => setCurrentPage("home")} />;
       default:
-        return (
-          <div className="flex items-center justify-center h-screen bg-white">
-            <p className="text-gray-600">Page not found</p>
-          </div>
-        );
+        return null;
     }
   };
 
