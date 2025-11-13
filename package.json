@@ -3,6 +3,7 @@
       "version": "0.1.0",
       "private": true,
       "dependencies": {
+            "@farcaster/frame-sdk": "^0.1.12",
             "@farcaster/miniapp-sdk": "*",
             "@farcaster/miniapp-wagmi-connector": "*",
             "@jsr/supabase__supabase-js": "^2.49.8",

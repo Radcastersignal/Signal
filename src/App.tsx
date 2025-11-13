@@ -11,7 +11,7 @@ import { SignalDetailPage } from "./components/SignalDetailPage";
 import { CreateSignalPage } from "./components/CreateSignalPage";
 import { WalletConnector } from "./components/WalletConnector";
 import { Toaster } from "./components/ui/sonner";
-import { sdk } from "@farcaster/miniapp-sdk";
+import sdk from "@farcaster/frame-sdk";
 import { checkAndInitialize } from "./utils/initializeApp";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FarcasterProvider } from "./context/FarcasterContext";
@@ -35,21 +35,27 @@ export default function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // ✅ إخبار Farcaster فوراً بأن التطبيق جاهز - هذا يحل مشكلة الشاشة السوداء
+        console.log("🚀 Starting Farcaster initialization...");
+        
+        // ✅ الخطوة 1: إخبار Farcaster فوراً بأن التطبيق جاهز
         sdk.actions.ready();
-        console.log("✅ sdk.actions.ready() called immediately");
+        console.log("✅ sdk.actions.ready() called successfully");
 
-        // ✅ ثم تهيئة باقي التطبيق في الخلفية
+        // ✅ الخطوة 2: تهيئة باقي التطبيق في الخلفية
         await checkAndInitialize();
         setInitialized(true);
-        console.log("✅ App data initialized successfully");
+        console.log("✅ App initialized successfully");
 
       } catch (err) {
-        console.error("❌ Error initializing app:", err);
+        console.error("❌ Error during initialization:", err);
         // ✅ حتى في حالة الخطأ، نسمح للتطبيق بالظهور
         setInitialized(true);
         // ✅ نتأكد من استدعاء ready() حتى لو فشلت التهيئة
-        sdk.actions.ready();
+        try {
+          sdk.actions.ready();
+        } catch (sdkError) {
+          console.error("❌ Error calling sdk.actions.ready():", sdkError);
+        }
       }
     };
 
@@ -71,13 +77,13 @@ export default function App() {
   };
 
   const renderPage = () => {
-    // ✅ عرض شاشة تحميل بسيطة بدلاً من شاشة سوداء
+    // ✅ عرض شاشة تحميل بسيطة أثناء التهيئة
     if (!initialized) {
       return (
         <div className="flex items-center justify-center h-screen bg-white">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">جاري التحميل...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00ffcc] mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading Data Signals Hub...</p>
           </div>
         </div>
       );
@@ -136,7 +142,7 @@ export default function App() {
       default:
         return (
           <div className="flex items-center justify-center h-screen bg-white">
-            <p className="text-gray-600">الصفحة غير موجودة</p>
+            <p className="text-gray-600">Page not found</p>
           </div>
         );
     }
