@@ -1,0 +1,5 @@
+# Redirect with a 302
+[[redirects]]
+from = "/.well-known/farcaster.json"
+to = "https://api.farcaster.xyz/miniapps/hosted-manifest/019a82e9-5085-82aa-a050-91200f187202"
+status = 302
